@@ -37,12 +37,10 @@ void file_free(void *data) {
 // Filetype
 static rb_data_type_t fileType = {
 	.wrap_struct_name = "file",
-
 	.function = {
 		.dmark = NULL,
 		.dfree = file_free,
 	},
-
 	.data = NULL,
 
 	#ifdef RUBY_TYPED_FREE_IMMEDIATELY
@@ -67,7 +65,7 @@ static rb_data_type_t fileType = {
 	`mode: LibmagicRb::MAGIC_CHECK | LibmagicRb::MAGIC_SYMLINK | Libmagic_MAGIC_MIME`
 	If `mode` key is nil, it will default to `MAGIC_MIME | MAGIC_CHECK | MAGIC_SYMLINK`
 */
-static VALUE _check_(volatile VALUE obj, volatile VALUE args) {
+static VALUE _check_(VALUE obj, VALUE args) {
 	if(!RB_TYPE_P(args, T_HASH)) {
 		rb_raise(rb_eArgError, "Expected hash as argument.") ;
 	}
@@ -75,12 +73,12 @@ static VALUE _check_(volatile VALUE obj, volatile VALUE args) {
 	// Database Path
 	VALUE argDBPath = rb_hash_aref(args, ID2SYM(rb_intern("db"))) ;
 
-	char *databasePath ;
-	if (RB_TYPE_P(argDBPath, T_NIL)) {
-		databasePath = NULL ;
-	} else if (!RB_TYPE_P(argDBPath, T_STRING)) {
-		rb_raise(rb_eArgError, "Database name must be an instance of String.") ;
-	} else {
+	char *databasePath = NULL ;
+	if (!NIL_P(argDBPath)) {
+		if (!RB_TYPE_P(argDBPath, T_STRING)) {
+			rb_raise(rb_eArgError, "Database name must be an instance of String.") ;
+		}
+
 		databasePath = StringValuePtr(argDBPath) ;
 	}
 
@@ -107,6 +105,10 @@ static VALUE _check_(volatile VALUE obj, volatile VALUE args) {
 	// Checks
 	struct magic_set *magic = magic_open(modes) ;
 
+	if (!magic) {
+		rb_raise(rb_eRuntimeError, "Failed to initialize magic cookie.") ;
+	}
+
 	// Check if the database is a valid file or not
 	// Raises ruby error which will return.
 	fileReadable(checkPath) ;
@@ -115,7 +117,10 @@ static VALUE _check_(volatile VALUE obj, volatile VALUE args) {
 		magic_validate_db(magic, databasePath) ;
 	}
 
-	magic_load(magic, databasePath) ;
+	if (magic_load(magic, databasePath) == -1) {
+		magic_close(magic);
+		rb_raise(rb_eInvalidDBError, "Failed to load magic database: %s", magic_error(magic)) ;
+	}
 
 	const char *mt = magic_file(magic, checkPath) ;
 
@@ -162,7 +167,7 @@ static VALUE _check_(volatile VALUE obj, volatile VALUE args) {
 	Flags/modes applied to cookie, will not affect cookie2 as well. Think of them as totally different containers.
 	Of course, you must close cookies when you don't need them. Otherwise it can use memories unless GC is triggered.
 */
-VALUE rb_libmagicRb_initialize(volatile VALUE self, volatile VALUE args) {
+VALUE rb_libmagicRb_initialize(VALUE self, VALUE args) {
 	// Database Path
 	if(!RB_TYPE_P(args, T_HASH)) {
 		rb_raise(rb_eArgError, "Expected hash as argument.") ;
@@ -207,9 +212,14 @@ VALUE rb_libmagicRb_initialize(volatile VALUE self, volatile VALUE args) {
 	return self ;
 }
 
-VALUE initAlloc(volatile VALUE self) {
+VALUE initAlloc(VALUE self) {
 	magic_t *cookie ;
 	cookie = malloc(sizeof(*cookie)) ;
+
+	if (!cookie) {
+		rb_raise(rb_eNoMemError, "Failed to allocate memory for magic cookie.") ;
+	}
+
 	*cookie = magic_open(0) ;
 
 	return TypedData_Wrap_Struct(self, &fileType, cookie) ;
