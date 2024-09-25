@@ -40,10 +40,8 @@ VALUE _loadGlobal_(volatile VALUE self, volatile VALUE dbPath) {
 	char *databasePath = NULL ;
 
 	if (RB_TYPE_P(dbPath, T_STRING)) {
-		databasePath = StringValuePtr(dbPath) ;
-		rb_iv_set(self, "@db", dbPath) ;
-	} else if(RB_TYPE_P(dbPath, T_STRING)) {
-		rb_iv_set(self, "@db", Qnil) ;
+		databasePath = StringValuePtr(dbPath);
+		rb_iv_set(self, "@db", dbPath);
 	}
 
 	// Check if the database is a valid file or not
