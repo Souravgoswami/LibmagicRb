@@ -60,3 +60,39 @@ jobs:
       run: rake compile
     - name: Run tests
       run: rake test
+
+    - uses: actions/checkout@v4
+    - name: Test LibmagicRb with Ruby 3.1
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: 3.1
+    - name: Install dependencies
+      run: bundle install
+    - name: Run rake compile
+      run: rake compile
+    - name: Run tests
+      run: rake test
+
+    - uses: actions/checkout@v4
+    - name: Test LibmagicRb with Ruby 3.2
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: 3.2
+    - name: Install dependencies
+      run: bundle install
+    - name: Run rake compile
+      run: rake compile
+    - name: Run tests
+      run: rake test
+
+    - uses: actions/checkout@v4
+    - name: Test LibmagicRb with Ruby 3.3
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: 3.3
+    - name: Install dependencies
+      run: bundle install
+    - name: Run rake compile
+      run: rake compile
+    - name: Run tests
+      run: rake test
