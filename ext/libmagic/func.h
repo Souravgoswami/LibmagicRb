@@ -11,12 +11,12 @@
 */
 
 VALUE _closeGlobal_(VALUE self) {
-	RB_UNWRAP(cookie) ;
+	RB_UNWRAP(cookie);
 
-	magic_close(*cookie) ;
-	*cookie = NULL ;
-	rb_ivar_set(self, rb_intern("@closed"), Qtrue) ;
-	return self ;
+	magic_close(*cookie);
+	*cookie = NULL;
+	rb_ivar_set(self, rb_intern("@closed"), Qtrue);
+	return self;
 }
 
 /*
@@ -37,7 +37,7 @@ VALUE _closeGlobal_(VALUE self) {
 */
 
 VALUE _loadGlobal_(VALUE self, VALUE dbPath) {
-	char *databasePath = NULL ;
+	char *databasePath = NULL;
 
 	if (RB_TYPE_P(dbPath, T_STRING)) {
 		databasePath = StringValuePtr(dbPath);
@@ -46,16 +46,16 @@ VALUE _loadGlobal_(VALUE self, VALUE dbPath) {
 
 	// Check if the database is a valid file or not
 	// Raises ruby error which will return.
-	RB_UNWRAP(cookie) ;
+	RB_UNWRAP(cookie);
 
-	if(databasePath) magic_validate_db(*cookie, databasePath) ;
+	if(databasePath) magic_validate_db(*cookie, databasePath);
 
 	if (magic_load(*cookie, databasePath) == -1) {
-		rb_raise(rb_eRuntimeError, "Failed to load magic database: %s", magic_error(*cookie)) ;
+		rb_raise(rb_eRuntimeError, "Failed to load magic database: %s", magic_error(*cookie));
 	}
 
 
-	return self ;
+	return self;
 }
 
 /*
@@ -73,30 +73,30 @@ VALUE _loadGlobal_(VALUE self, VALUE dbPath) {
 */
 
 VALUE _checkGlobal_(VALUE self) {
-	RB_UNWRAP(cookie) ;
+	RB_UNWRAP(cookie);
 
 	// Database path
-	VALUE db = rb_iv_get(self, "@db") ;
+	VALUE db = rb_iv_get(self, "@db");
 
-	char *database = NULL ;
+	char *database = NULL;
 	if(RB_TYPE_P(db, T_STRING)) {
-		database = StringValuePtr(db) ;
+		database = StringValuePtr(db);
 	}
 
 	// File path
-	VALUE f = rb_iv_get(self, "@file") ;
-	char *file = StringValuePtr(f) ;
+	VALUE f = rb_iv_get(self, "@file");
+	char *file = StringValuePtr(f);
 
-	if(database) magic_validate_db(*cookie, database) ;
+	if(database) magic_validate_db(*cookie, database);
 
 	if (magic_load(*cookie, database) == -1) {
-		rb_raise(rb_eRuntimeError, "Failed to load magic database: %s", magic_error(*cookie)) ;
+		rb_raise(rb_eRuntimeError, "Failed to load magic database: %s", magic_error(*cookie));
 	}
 
-	fileReadable(file) ;
-	const char *mt = magic_file(*cookie, file) ;
+	fileReadable(file);
+	const char *mt = magic_file(*cookie, file);
 
-	return mt ? rb_str_new_cstr(mt) : Qnil ;
+	return mt ? rb_str_new_cstr(mt) : Qnil;
 }
 
 /*
@@ -113,16 +113,16 @@ VALUE _checkGlobal_(VALUE self) {
 
 VALUE _getParamGlobal_(VALUE self, VALUE param) {
 	#if MAGIC_VERSION > 525
-		RB_UNWRAP(cookie) ;
+		RB_UNWRAP(cookie);
 
-		unsigned int _param = NUM2UINT(param) ;
-		unsigned long value ;
+		unsigned int _param = NUM2UINT(param);
+		unsigned long value;
 
-		int status = magic_getparam(*cookie, _param, &value) ;
-		if (status) return Qnil ;
-		return ULONG2NUM(value) ;
+		int status = magic_getparam(*cookie, _param, &value);
+		if (status) return Qnil;
+		return ULONG2NUM(value);
 	#else
-		return Qnil ;
+		return Qnil;
 	#endif
 }
 
@@ -149,20 +149,20 @@ VALUE _getParamGlobal_(VALUE self, VALUE param) {
 
 VALUE _setParamGlobal_(VALUE self, VALUE param, VALUE paramVal) {
 	#if MAGIC_VERSION > 525
-		unsigned int _param = NUM2UINT(param) ;
-		unsigned long _paramVal = NUM2ULONG(paramVal) ;
+		unsigned int _param = NUM2UINT(param);
+		unsigned long _paramVal = NUM2ULONG(paramVal);
 
-		RB_UNWRAP(cookie) ;
+		RB_UNWRAP(cookie);
 
-		unsigned long value ;
-		magic_setparam(*cookie, _param, &_paramVal) ;
+		unsigned long value;
+		magic_setparam(*cookie, _param, &_paramVal);
 
-		int status = magic_getparam(*cookie, _param, &value) ;
-		if (status) return Qnil ;
+		int status = magic_getparam(*cookie, _param, &value);
+		if (status) return Qnil;
 
-		return ULONG2NUM((int)value) ;
+		return ULONG2NUM((int)value);
 	#else
-		return Qnil ;
+		return Qnil;
 	#endif
 }
 
@@ -186,25 +186,25 @@ VALUE _setParamGlobal_(VALUE self, VALUE param, VALUE paramVal) {
 */
 
 VALUE _bufferGlobal_(VALUE self, VALUE string) {
-	RB_UNWRAP(cookie) ;
+	RB_UNWRAP(cookie);
 
-	VALUE db = rb_iv_get(self, "@db") ;
+	VALUE db = rb_iv_get(self, "@db");
 
-	char *database = NULL ;
+	char *database = NULL;
 	if(RB_TYPE_P(db, T_STRING)) {
-		database = StringValuePtr(db) ;
+		database = StringValuePtr(db);
 	}
 
-	if(database) magic_validate_db(*cookie, database) ;
+	if(database) magic_validate_db(*cookie, database);
 
 	if (magic_load(*cookie, database) == -1) {
-		rb_raise(rb_eRuntimeError, "Failed to load magic database: %s", magic_error(*cookie)) ;
+		rb_raise(rb_eRuntimeError, "Failed to load magic database: %s", magic_error(*cookie));
 	}
 
-	char *buffer = StringValuePtr(string) ;
-	const char *buf = magic_buffer(*cookie, buffer, strlen(buffer)) ;
+	char *buffer = StringValuePtr(string);
+	const char *buf = magic_buffer(*cookie, buffer, strlen(buffer));
 
-	return buf ? rb_str_new_cstr(buf) : Qnil ;
+	return buf ? rb_str_new_cstr(buf) : Qnil;
 }
 
 /*
@@ -238,19 +238,19 @@ VALUE _bufferGlobal_(VALUE self, VALUE string) {
 */
 
 VALUE _listGlobal_(VALUE self) {
-	RB_UNWRAP(cookie) ;
+	RB_UNWRAP(cookie);
 
-	VALUE db = rb_iv_get(self, "@db") ;
+	VALUE db = rb_iv_get(self, "@db");
 
-	char *database = NULL ;
+	char *database = NULL;
 	if (RB_TYPE_P(db, T_STRING)) {
-		database = StringValuePtr(db) ;
+		database = StringValuePtr(db);
 	}
 
-	if(database) magic_validate_db(*cookie, database) ;
-	int status = magic_list(*cookie, database) ;
+	if(database) magic_validate_db(*cookie, database);
+	int status = magic_list(*cookie, database);
 
-	return INT2FIX(status) ;
+	return INT2FIX(status);
 }
 
 /*
@@ -285,15 +285,15 @@ VALUE _listGlobal_(VALUE self) {
 */
 
 VALUE _setflagsGlobal_(VALUE self, VALUE flags) {
-	unsigned int flag = NUM2UINT(flags) ;
+	unsigned int flag = NUM2UINT(flags);
 
-	RB_UNWRAP(cookie) ;
-	int status = magic_setflags(*cookie, flag) ;
+	RB_UNWRAP(cookie);
+	int status = magic_setflags(*cookie, flag);
 
 	if (status) {
-		return Qnil ;
+		return Qnil;
 	} else {
-		rb_ivar_set(self, rb_intern("@mode"), flags) ;
-		return flags ;
+		rb_ivar_set(self, rb_intern("@mode"), flags);
+		return flags;
 	}
 }
