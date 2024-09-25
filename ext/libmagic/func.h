@@ -10,7 +10,7 @@
 	Returns self.
 */
 
-VALUE _closeGlobal_(volatile VALUE self) {
+VALUE _closeGlobal_(VALUE self) {
 	RB_UNWRAP(cookie) ;
 
 	magic_close(*cookie) ;
@@ -36,7 +36,7 @@ VALUE _closeGlobal_(volatile VALUE self) {
 	Returns self.
 */
 
-VALUE _loadGlobal_(volatile VALUE self, volatile VALUE dbPath) {
+VALUE _loadGlobal_(VALUE self, VALUE dbPath) {
 	char *databasePath = NULL ;
 
 	if (RB_TYPE_P(dbPath, T_STRING)) {
@@ -49,7 +49,11 @@ VALUE _loadGlobal_(volatile VALUE self, volatile VALUE dbPath) {
 	RB_UNWRAP(cookie) ;
 
 	if(databasePath) magic_validate_db(*cookie, databasePath) ;
-	magic_load(*cookie, databasePath) ;
+
+	if (magic_load(*cookie, databasePath) == -1) {
+		rb_raise(rb_eRuntimeError, "Failed to load magic database: %s", magic_error(*cookie)) ;
+	}
+
 
 	return self ;
 }
@@ -68,7 +72,7 @@ VALUE _loadGlobal_(volatile VALUE self, volatile VALUE dbPath) {
 		Returns String or nil.
 */
 
-VALUE _checkGlobal_(volatile VALUE self) {
+VALUE _checkGlobal_(VALUE self) {
 	RB_UNWRAP(cookie) ;
 
 	// Database path
@@ -84,7 +88,10 @@ VALUE _checkGlobal_(volatile VALUE self) {
 	char *file = StringValuePtr(f) ;
 
 	if(database) magic_validate_db(*cookie, database) ;
-	magic_load(*cookie, database) ;
+
+	if (magic_load(*cookie, database) == -1) {
+		rb_raise(rb_eRuntimeError, "Failed to load magic database: %s", magic_error(*cookie)) ;
+	}
 
 	fileReadable(file) ;
 	const char *mt = magic_file(*cookie, file) ;
@@ -104,7 +111,7 @@ VALUE _checkGlobal_(volatile VALUE self) {
 		# => #<LibmagicRb:0x00005581018f35e0 @closed=true, @db=nil, @file="/usr/share/dict/words", @mode=1106>
 */
 
-VALUE _getParamGlobal_(volatile VALUE self, volatile VALUE param) {
+VALUE _getParamGlobal_(VALUE self, VALUE param) {
 	#if MAGIC_VERSION > 525
 		RB_UNWRAP(cookie) ;
 
@@ -140,7 +147,7 @@ VALUE _getParamGlobal_(volatile VALUE self, volatile VALUE param) {
 	Returns Integer or nil on failure.
 */
 
-VALUE _setParamGlobal_(volatile VALUE self, volatile VALUE param, volatile VALUE paramVal) {
+VALUE _setParamGlobal_(VALUE self, VALUE param, VALUE paramVal) {
 	#if MAGIC_VERSION > 525
 		unsigned int _param = NUM2UINT(param) ;
 		unsigned long _paramVal = NUM2ULONG(paramVal) ;
@@ -178,7 +185,7 @@ VALUE _setParamGlobal_(volatile VALUE self, volatile VALUE param, volatile VALUE
 	Returns either String or nil.
 */
 
-VALUE _bufferGlobal_(volatile VALUE self, volatile VALUE string) {
+VALUE _bufferGlobal_(VALUE self, VALUE string) {
 	RB_UNWRAP(cookie) ;
 
 	VALUE db = rb_iv_get(self, "@db") ;
@@ -189,7 +196,10 @@ VALUE _bufferGlobal_(volatile VALUE self, volatile VALUE string) {
 	}
 
 	if(database) magic_validate_db(*cookie, database) ;
-	magic_load(*cookie, database) ;
+
+	if (magic_load(*cookie, database) == -1) {
+		rb_raise(rb_eRuntimeError, "Failed to load magic database: %s", magic_error(*cookie)) ;
+	}
 
 	char *buffer = StringValuePtr(string) ;
 	const char *buf = magic_buffer(*cookie, buffer, strlen(buffer)) ;
@@ -227,7 +237,7 @@ VALUE _bufferGlobal_(volatile VALUE self, volatile VALUE string) {
 		=> #<LibmagicRb:0x000055cf280a9b30 @closed=true, @db=nil, @file=".", @mode=1106>
 */
 
-VALUE _listGlobal_(volatile VALUE self) {
+VALUE _listGlobal_(VALUE self) {
 	RB_UNWRAP(cookie) ;
 
 	VALUE db = rb_iv_get(self, "@db") ;
@@ -274,7 +284,7 @@ VALUE _listGlobal_(volatile VALUE self) {
 		# => #<LibmagicRb:0x00005583732e1070 @closed=true, @db=nil, @file=".", @mode=256>
 */
 
-VALUE _setflagsGlobal_(volatile VALUE self, volatile VALUE flags) {
+VALUE _setflagsGlobal_(VALUE self, VALUE flags) {
 	unsigned int flag = NUM2UINT(flags) ;
 
 	RB_UNWRAP(cookie) ;
