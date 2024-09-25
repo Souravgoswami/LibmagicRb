@@ -25,10 +25,10 @@ VALUE rb_eIsDirError ;
 VALUE rb_eFileClosedError ;
 
 // Garbage collect
-void file_free(void **data) {
-	if(*data) {
-		magic_close(*data) ;
-		*data = NULL ;
+void file_free(void *data) {
+	if(data) {
+		magic_close(*(void **)data) ;
+		*(void **)data = NULL ;
 	}
 
 	free(data) ;
